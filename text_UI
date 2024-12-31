@@ -1,0 +1,190 @@
+# ECOR 1042 Lab 6 - Individual submission for text_UI
+
+# Update "" with your name (e.g., Cristina Ruiz Martin)
+__author__ = "RileyHanna"
+
+# Update "" with your student number (e.g., 100100100)
+__student_number__ = "101260320"
+
+# Update "" with your team (e.g. T-102, use the notation provided in the example)
+__team__ = "T098"
+
+#==========================================#
+# Place your script for your text_UI after this line
+from load_data import *
+from sort import *
+import matplotlib.pyplot as plt
+import numpy as np
+
+def display_menu():
+    while True: 
+        print( 'The available commands are:\n L)oad Data\n S)ort Data\n C)urve Fit\n H)istogram\n E)xit\n')
+        
+        command = input('Please type your command: ').lower()
+        
+        if command in ['l', 's', 'c', 'h', 'e']: 
+            return command
+        else:
+            print('Invalid')
+            
+
+def load_data_command():
+    
+    file = input('Please enter the name of the file: ')
+    attribute = input('Please enter the attribute to use as filter:').upper()
+    value = input('Please enter the value of the attribute:')
+    if value.isnumeric():
+        value = int(value)
+        
+    data = load_data(file, (attribute, value))
+    
+    if data is None:
+        print('Data not loaded, please try again')
+        return None
+    
+    
+    if attribute != 'All':
+        
+        print('data loaded')
+        return data
+        
+def sort_data_command(data):
+    if data is None:
+        print('File not loaded')
+        return
+    
+    while True:
+        attribute = input('Please enter the attribute you want to use for sorting:\n CACH PRP M_AVG MYCT: \n ')
+        
+        if attribute not in data[0]:
+            print('invalid')
+            continue
+        else:
+            break
+        
+    while True:
+        order = input('Ascending (A) or Descending (D) order: ').upper()
+        if order not in ['A', 'D']:
+            print('invalid')
+            continue
+        else:
+            break
+        
+    while True: 
+        display = input('Do you want to display the data?:').lower()
+        if display == 'y':
+            if attribute == 'CACH':
+                print(sort_cache_bubble(data, order))
+            if attribute =='PRP':
+                print(sort_prp_selection(data, order))
+            if attribute =='M_AVG':
+                print(sort_m_avg_insertion(data, order))
+            if attribute =='MTCT':
+                print(sort_myct_bubble(data, order))            
+            break 
+        elif display == 'n':
+            break
+        else:
+            ('invalid')
+            
+        return sorte
+    
+def curve_fit_command(data):
+    if data is None:
+        print('invalid')
+        return 
+    while True:
+        coef = input('Please enter the order of the polynomial to be fitted:')
+        if coef < 1:
+            print('invalid')
+            continue
+        else:
+            coef = int(coef)
+            break
+        
+    x = np.array(data[1:], dtype = float )[:,0]
+    y = np.array(data[1:], dtype = float )[:,1]
+    coef = np.polyfit(x, y, order)
+    polynomial = np.poly1d(coef)
+    
+    plt.plot(x, y, 'bo', label='orginal data')
+    plt.plot(x, 'r-', label='fitted polynomial')
+    plt.legend()
+    plt.show()
+    print('Complete')
+    
+def histogram_plot_command(data):
+    if data is None:
+        print('invalid')
+    attribute = input("Please enter the attribute you want to use for plotting ")
+    list_items = []
+    number_of_copys = {}
+    index = 0
+
+    # take all items tied to key given and put them into a list
+    for element in range(len(data)):
+        list_items.append(data[element][attribute])
+
+    # count all duplicates
+    while len(list_items) > 0:
+
+        index = 0
+        # append the key with item of 1 to the list
+        number_of_copys[list_items[0]] = 1
+
+        # loop through all items to find matches
+        for i in range(len(list_items)):
+            # check for a martch but not with itself
+            if 0 != index and list_items[0] == list_items[index]:
+                # add count to dict of list_items[0] in number_of_copys
+                number_of_copys[list_items[0]] += 1
+                # del the index so its only recorded once
+                del list_items[index]
+                index -= 1
+            index += 1
+
+        # del the original becuase it and all its duplicates should have been recorded
+        del list_items[0]
+
+    # put keys and values into their own lists
+    items_x = list(number_of_copys.keys())
+    count_y = list(number_of_copys.values())
+
+    # set and display histogram (bar graph)
+    fig1 = plt.figure()
+    plt.title("Simple Bar")
+    plt.xlabel(attribute + ' attribute')
+    plt.ylabel('Amount of ' + attribute + "'s")
+    plt.bar(items_x, count_y, color='cyan')
+    plt.show()
+
+    # return max int if attributes are ints, if not, return -1
+    if type(items_x[0]) == int:
+        return max(items_x)
+    else:
+        return -1
+
+        
+def exit_command():
+    print('exit')
+    return
+    
+def main():
+    data = None 
+    while True:
+        command = display_menu()
+        if command == 'l':
+            data = load_data_command()
+        elif command == 's':
+            data = sort_data_command(data)
+        elif command == 'c':
+            data = curve_fit_command(data)
+        elif command == 'h':
+            data = histogram_plot_command(data)
+        else:
+            exit_command()
+            break
+        
+if __name__ == '__main__':
+    main()
+        
